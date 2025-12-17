@@ -22,19 +22,26 @@ app.use(morgan('dev'));
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-const productRoutes = require('./routes/productRoutes');
+const paddyRoutes = require('./routes/paddyRoutes');
+const equipmentRoutes = require('./routes/equipmentRoutes');
+const chemicalRoutes = require('./routes/chemicalRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const salesRoutes = require('./routes/salesRoutes');
 const creditRoutes = require('./routes/creditRoutes');
 const reportsRoutes = require('./routes/reportsRoutes');
+const billRoutes = require('./routes/billRoutes');
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
-app.use('/products', productRoutes);
+app.use('/paddy', paddyRoutes);
+app.use('/equipment', equipmentRoutes);
+app.use('/chemicals', chemicalRoutes);
 app.use('/inventory', inventoryRoutes);
 app.use('/sales', salesRoutes);
 app.use('/credit', creditRoutes);
 app.use('/reports', reportsRoutes);
+app.use('/bills', billRoutes);
+
 
 // Health Check
 app.get('/', (req, res) => {

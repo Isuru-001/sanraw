@@ -2,14 +2,14 @@ const salesService = require('../services/salesService');
 
 const createSale = async (req, res) => {
     try {
-        const { product_id, quantity, payment_type, customer_nic } = req.body;
+        const { item_id, category, quantity, payment_type, customer_nic } = req.body;
         const user_id = req.user.id;
 
-        if (!product_id || !quantity || !payment_type) {
-            return res.status(400).json({ message: 'Product, Quantity, and Payment Type are required' });
+        if (!item_id || !category || !quantity || !payment_type) {
+            return res.status(400).json({ message: 'Item, Category, Quantity, and Payment Type are required' });
         }
 
-        await salesService.createSale({ product_id, quantity, payment_type, customer_nic, user_id });
+        await salesService.createSale({ item_id, category, quantity, payment_type, customer_nic, user_id });
         res.status(201).json({ message: 'Sale recorded successfully' });
     } catch (err) {
         res.status(400).json({ message: err.message });

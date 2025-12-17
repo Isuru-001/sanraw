@@ -1,21 +1,28 @@
 const pool = require('../config/db');
 
 const addPurchase = async (purchaseData) => {
-    const { product_id, quantity, buy_price, payment_type } = purchaseData;
+    const { item_id, category, quantity, buy_price, payment_type } = purchaseData;
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
 
         // 1. Record Purchase
         const [result] = await connection.query(
-            'INSERT INTO inventory_purchase (product_id, quantity, buy_price, payment_type) VALUES (?, ?, ?, ?)',
-            [product_id, quantity, buy_price, payment_type]
+            'INSERT INTO inventory_purchase (item_id, category, quantity, buy_price, payment_type) VALUES (?, ?, ?, ?, ?)',
+            [item_id, category, quantity, buy_price, payment_type]
         );
 
         // 2. Update Product Stock (Increase)
+        let tableName;
+        if (category === 'paddy') tableName = 'paddy';
+        else if (category === 'equipment') tableName = 'equipment';
+        else if (category === 'fertilizer_pesticide') tableName = 'fertilizer_pesticide';
+        else throw new Error('Invalid category');
+
+        // Note: Safe to inject tableName because it's strictly validated above
         await connection.query(
-            'UPDATE product SET stock_quantity = stock_quantity + ? WHERE id = ?',
-            [quantity, product_id]
+            `UPDATE ${tableName} SET stock = stock + ? WHERE id = ?`,
+            [quantity, item_id]
         );
 
         await connection.commit();

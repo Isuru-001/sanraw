@@ -2,8 +2,8 @@ const inventoryService = require('../services/inventoryService');
 
 const addPurchase = async (req, res) => {
     try {
-        const { product_id, quantity, buy_price, payment_type } = req.body;
-        if (!product_id || !quantity || !buy_price || !payment_type) {
+        const { item_id, category, quantity, buy_price, payment_type } = req.body;
+        if (!item_id || !category || !quantity || !buy_price || !payment_type) {
             return res.status(400).json({ message: 'All fields are required' });
         }
         await inventoryService.addPurchase(req.body);

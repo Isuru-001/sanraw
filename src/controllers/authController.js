@@ -43,14 +43,33 @@ const resetPassword = async (req, res) => {
 
 const signup = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
-        if (!name || !email || !password) {
-            return res.status(400).json({ message: 'Name, email, and password required' });
+        const { first_name, last_name, email, password, confirmPassword } = req.body;
+
+        if (!first_name || !last_name || !email || !password || !confirmPassword) {
+            return res.status(400).json({ message: 'All fields are required' });
         }
-        await authService.signup({ name, email, password, role: 'employee' });
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: 'Passwords do not match' });
+        }
+
+        await authService.signup({ first_name, last_name, email, password, role: 'employee' });
         res.status(201).json({ message: 'User registered successfully' });
     } catch (err) {
         res.status(400).json({ message: err.message });
+    }
+};
+
+const logout = async (req, res) => {
+    try {
+        // req.user should be populated by authMiddleware for authenticated routes
+        if (req.user && req.user.id) {
+            const userModel = require('../models/userModel'); // Lazy import to avoid circular dependency issues if any
+            await userModel.logLogout(req.user.id);
+        }
+        res.json({ message: 'Logged out successfully' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error logging out' });
     }
 };
 
@@ -59,5 +78,6 @@ module.exports = {
     signup,
     requestResetPassword,
     verifyOTP,
-    resetPassword
+    resetPassword,
+    logout
 };

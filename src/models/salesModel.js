@@ -1,7 +1,7 @@
 const pool = require('../config/db');
 
 const createSale = async (saleData, productPrice) => {
-    const { product_id, quantity, payment_type, customer_nic, user_id } = saleData;
+    const { item_id, category, quantity, payment_type, customer_nic, user_id } = saleData;
     const total_price = quantity * productPrice;
 
     const connection = await pool.getConnection();
@@ -10,14 +10,20 @@ const createSale = async (saleData, productPrice) => {
 
         // 1. Record Sale
         const [result] = await connection.query(
-            'INSERT INTO sale (product_id, quantity, total_price, payment_type, customer_nic, user_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [product_id, quantity, total_price, payment_type, customer_nic, user_id]
+            'INSERT INTO sale (item_id, category, quantity, total_price, payment_type, customer_nic, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [item_id, category, quantity, total_price, payment_type, customer_nic, user_id]
         );
 
         // 2. Reduce Stock
+        let tableName;
+        if (category === 'paddy') tableName = 'paddy';
+        else if (category === 'equipment') tableName = 'equipment';
+        else if (category === 'fertilizer_pesticide') tableName = 'fertilizer_pesticide';
+        else throw new Error('Invalid category');
+
         await connection.query(
-            'UPDATE product SET stock_quantity = stock_quantity - ? WHERE id = ?',
-            [quantity, product_id]
+            `UPDATE ${tableName} SET stock = stock - ? WHERE id = ?`,
+            [quantity, item_id]
         );
 
         // 3. Handle Credit

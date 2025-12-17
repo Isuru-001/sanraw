@@ -19,6 +19,9 @@ const login = async (email, password) => {
         { expiresIn: '1d' }
     );
 
+    // Record Login History
+    await userModel.logLogin(user.id);
+
     return { token, user: { id: user.id, email: user.email, role: user.role } };
 };
 

@@ -4,6 +4,18 @@ const userController = require('../controllers/userController');
 const verifyToken = require('../middleware/authMiddleware');
 const verifyRole = require('../middleware/roleMiddleware');
 
+const upload = require('../middleware/uploadMiddleware');
+
+
+router.get('/profile', verifyToken, userController.getProfile);
+router.put('/profile', verifyToken, upload.single('profile_image'), userController.updateProfile);
+
+// Login History
+router.get('/history', verifyToken, userController.getLoginHistory);
+router.delete('/history', verifyToken, userController.clearMyHistory);
+router.delete('/history/:id', verifyToken, userController.deleteLoginHistoryItem);
+
+
 // Owner only routes
 router.use(verifyToken, verifyRole(['owner']));
 
