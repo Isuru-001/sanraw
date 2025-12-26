@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS user (
     status ENUM('active', 'inactive') DEFAULT 'inactive',
     activation_token VARCHAR(255) DEFAULT NULL,
     activation_expires TIMESTAMP NULL,
+    reset_token VARCHAR(255) DEFAULT NULL,
+    reset_expires TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

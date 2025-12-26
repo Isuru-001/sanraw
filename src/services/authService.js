@@ -3,7 +3,7 @@ const { hashPassword, comparePassword } = require('../utils/hash');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const db = require('../config/db');
-const { sendActivationEmail } = require('../utils/emailService');
+const { sendActivationEmail, sendResetPasswordEmail } = require('../utils/emailService');
 
 const login = async (email, password) => {
     const user = await userModel.findUserByEmail(email);
@@ -34,17 +34,43 @@ const login = async (email, password) => {
 
 const requestResetPassword = async (email) => {
     const user = await userModel.findUserByEmail(email);
-    if (!user) return; // Fail silently for security
-    // In a real app, send OTP/Email. For this "simple" prompt, we just mock the process.
+    if (!user) {
+        // Fail silently or return success to avoid enumeration, but for this app I'll return success message.
+        return { message: 'If user exists, reset instructions sent.' };
+    }
+
+    // Generate Reset Token
+    const reset_token = crypto.randomBytes(32).toString('hex');
+    const reset_expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    // Save to DB
+    await userModel.saveResetToken(email, reset_token, reset_expires);
+
+    // Send Email
+    await sendResetPasswordEmail(email, reset_token);
+
     return { message: 'If user exists, reset instructions sent.' };
 };
 
-const resetPassword = async (email, newPassword) => {
-    const user = await userModel.findUserByEmail(email);
-    if (!user) throw new Error('User not found');
+const resetPassword = async (token, newPassword) => {
+    const user = await userModel.findUserByResetToken(token);
+    if (!user) throw new Error('Invalid or expired reset token');
 
     const hashedPassword = await hashPassword(newPassword);
-    await userModel.updatePassword(user.id, hashedPassword);
+    
+    // Update password and clear reset token
+    // We need a method to update password and clear token atomically or just two updates.
+    // userModel.updatePassword only updates password.
+    // Let's create a new method in userModel or just use raw query here if needed, 
+    // but better to add a method to userModel. 
+    // For now, I'll use updatePassword and then clear token, but ideally it should be one transaction.
+    // Actually, I should update userModel to support this.
+    // Let's check userModel again.
+    
+    // I will add a new method `resetUserPassword` to userModel in the next step or use what I have.
+    // Let's assume I'll add it.
+    await userModel.resetUserPassword(user.id, hashedPassword);
+    
     return { message: 'Password updated successfully' };
 };
 

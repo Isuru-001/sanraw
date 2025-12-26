@@ -40,11 +40,11 @@ const activateAccount = async (req, res) => {
 
 const resetPassword = async (req, res) => {
     try {
-        const { email, newPassword } = req.body;
-        if (!email || !newPassword) {
-            return res.status(400).json({ message: 'Email and new password required' });
+        const { token, newPassword } = req.body;
+        if (!token || !newPassword) {
+            return res.status(400).json({ message: 'Token and new password required' });
         }
-        await authService.resetPassword(email, newPassword);
+        await authService.resetPassword(token, newPassword);
         res.json({ message: 'Password reset successful' });
     } catch (err) {
         res.status(400).json({ message: err.message });
