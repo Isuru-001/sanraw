@@ -16,6 +16,10 @@ const login = async (email, password) => {
         throw new Error('Invalid credentials');
     }
 
+    if (user.status === 'inactive') {
+        throw new Error(`please activate your account (see inbox in ${email})`);
+    }
+
     const token = jwt.sign(
         { id: user.id, role: user.role },
         process.env.JWT_SECRET,
